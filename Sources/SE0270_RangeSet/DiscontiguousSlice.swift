@@ -122,4 +122,19 @@ extension DiscontiguousSlice: MutableCollection where Base: MutableCollection {
       base[i.base] = newValue
     }
   }
+
+  public subscript(bounds: Range<Index>) -> DiscontiguousSlice<Base> {
+    get {
+      let baseBounds = bounds.lowerBound.base ..< bounds.upperBound.base
+      let subset = subranges.intersection(RangeSet(baseBounds))
+      return DiscontiguousSlice<Base>(base: base, subranges: subset)
+    }
+    set {
+      let baseBounds = bounds.lowerBound.base ..< bounds.upperBound.base
+      let subset = subranges.intersection(RangeSet(baseBounds))
+      for i in newValue.indices where subset.contains(i.base) {
+        base[i.base] = newValue[i]
+      }
+    }
+  }
 }

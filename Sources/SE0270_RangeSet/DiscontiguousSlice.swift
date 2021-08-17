@@ -132,7 +132,9 @@ extension DiscontiguousSlice: MutableCollection where Base: MutableCollection {
     set {
       let baseBounds = bounds.lowerBound.base ..< bounds.upperBound.base
       let subset = subranges.intersection(RangeSet(baseBounds))
-      for i in newValue.indices where subset.contains(i.base) {
+      for i in newValue.indices {
+        precondition(subset.contains(i.base),
+                     "index out of range in slice assignment")
         base[i.base] = newValue[i]
       }
     }

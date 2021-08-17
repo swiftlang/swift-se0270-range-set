@@ -41,7 +41,9 @@ extension MutableCollection {
       DiscontiguousSlice(base: self, subranges: subranges)
     }
     set {
-      for i in newValue.indices where subranges.contains(i.base) {
+      for i in newValue.indices {
+        precondition(subranges.contains(i.base),
+                     "index out of range in slice assignment")
         self[i.base] = newValue[i]
       }
     }

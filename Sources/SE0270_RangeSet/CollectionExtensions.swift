@@ -41,7 +41,7 @@ extension MutableCollection {
       DiscontiguousSlice(base: self, subranges: subranges)
     }
     set {
-      for i in newValue.indices {
+      for i in newValue.indices where subranges.contains(i.base) {
         self[i.base] = newValue[i]
       }
     }

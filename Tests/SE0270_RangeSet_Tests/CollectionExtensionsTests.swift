@@ -155,6 +155,46 @@ final class CollectionExtensionsTests: XCTestCase {
     }
   }
   
+  func testDiscontiguousMutableSlicing() {
+    let initial = Array(1...30)
+    let changed = initial.map { 10*$0 }
+
+    let rangeStarts = initial.indices.every(10)
+    let rangeEnds = rangeStarts.compactMap {
+      initial.index($0, offsetBy: 5, limitedBy: initial.endIndex)
+    }
+    let ranges = zip(rangeStarts, rangeEnds).map(Range.init)
+
+    var mutated = initial
+    let set = RangeSet(ranges)
+    let subset = set.intersection(RangeSet(0..<(initial.count/2)))
+    mutated[subset] = changed[set]
+
+    XCTAssert(mutated[subset].elementsEqual(changed[subset]))
+    let antiset = RangeSet(initial.indices).subtracting(subset)
+    XCTAssert(mutated[antiset].elementsEqual(initial[antiset]))
+  }
+
+  func testDiscontiguousSliceMutableSlicing() {
+    let initial = Array(1...30)
+    let changed = initial.map { 10*$0 }
+
+    let rangeStarts = initial.indices.every(10)
+    let rangeEnds = rangeStarts.compactMap {
+      initial.index($0, offsetBy: 5, limitedBy: initial.endIndex)
+    }
+    let ranges = zip(rangeStarts, rangeEnds).map(Range.init)
+
+    let set = RangeSet(ranges)
+    let subset = set.intersection(RangeSet(0..<(initial.count/2)))
+    var mutated = initial[subset]
+    let mutations = subset.ranges.map({ initial[$0] }).joined().map({ 10*$0 })
+    mutated[...] = changed[set]
+    XCTAssertLessThan(mutated.count, changed[set].count)
+
+    XCTAssert(mutated.base[subset].elementsEqual(mutations))
+  }
+
   func testNoCopyOnWrite() {
     var numbers = COWLoggingArray(1...20)
     let copyCount = COWLoggingArray_CopyCount

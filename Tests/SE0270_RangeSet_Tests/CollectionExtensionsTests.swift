@@ -167,11 +167,11 @@ final class CollectionExtensionsTests: XCTestCase {
 
     var mutated = initial
     let set = RangeSet(ranges)
-    mutated[set] = changed[set]
+    let subset = set.intersection(RangeSet(0..<(initial.count/2)))
+    mutated[subset] = changed[set]
 
-    let mutatedElements = ranges.map({ initial[$0] }).joined().map({ 10*$0 })
-    XCTAssert(mutated[set].elementsEqual(mutatedElements))
-    let antiset = RangeSet(initial.indices).subtracting(set)
+    XCTAssert(mutated[subset].elementsEqual(changed[subset]))
+    let antiset = RangeSet(initial.indices).subtracting(subset)
     XCTAssert(mutated[antiset].elementsEqual(initial[antiset]))
   }
 

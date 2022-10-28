@@ -158,19 +158,31 @@ public struct RangeSet<Bound: Comparable> {
   /// - Complexity: O(*n*), where *n* is the number of ranges in the range
   ///   set.
   public mutating func insert(contentsOf range: Range<Bound>) {
+    _ = _insert(contentsOf: range)
+  }
+
+  /// Inserts the given range into the range set.
+  ///
+  /// - Parameter range: The range to insert into the set.
+  ///
+  /// - Returns: `true` if the range set was modified.
+  ///
+  /// - Complexity: O(*n*), where *n* is the number of ranges in the range
+  ///   set.
+  internal mutating func _insert(contentsOf range: Range<Bound>) -> Bool {
     // Shortcuts for the (literal) edge cases
-    if range.isEmpty { return }
+    if range.isEmpty { return false }
     guard !_ranges.isEmpty else {
       _ranges.append(range)
-      return
+      return true
     }
     guard range.lowerBound < _ranges.last!.upperBound else {
       _append(range)
-      return
+      return true
     }
     guard range.upperBound >= _ranges.first!.lowerBound else {
       _ranges.insert(range, at: 0)
-      return
+      return true
     }
     
     let indices = _indicesOfRange(range)
@@ -178,7 +190,7 @@ public struct RangeSet<Bound: Comparable> {
     // Non-overlapping is a simple insertion.
     guard !indices.isEmpty else {
       _ranges.insert(range, at: indices.lowerBound)
-      return
+      return true
     }
     
     // Find the lower and upper bounds of the overlapping ranges.
@@ -188,9 +200,18 @@ public struct RangeSet<Bound: Comparable> {
     let newUpperBound = Swift.max(
       _ranges[indices.upperBound - 1].upperBound,
       range.upperBound)
-    _ranges.replaceSubrange(
-      indices,
-      with: CollectionOfOne(newLowerBound..<newUpperBound))
+    if indices.count == 1 {
+      // If we’re replacing a single range, we _may_ not be
+      // changing anything
+      let didChange = _ranges[indices.lowerBound] != newLowerBound..<newUpperBound
+      _ranges[indices.lowerBound] = newLowerBound..<newUpperBound
+      return didChange
+    } else {
+      _ranges.replaceSubrange(
+        indices,
+        with: CollectionOfOne(newLowerBound..<newUpperBound))
+      return true
+    }
   }
   
   /// Removes the given range from the range set.
@@ -290,12 +311,16 @@ extension RangeSet {
   ///     valid index of `collection` that isn't the collection's `endIndex`.
   ///   - collection: The collection that contains `index`.
   ///
+  /// - Returns: `true` if the range set was modified, or `false` if
+  ///   the given `index` was already in the range set.
+  ///
   /// - Complexity: O(*n*), where *n* is the number of ranges in the range
   ///   set.
-  public mutating func insert<C>(_ index: Bound, within collection: C)
+  @discardableResult
+  public mutating func insert<C>(_ index: Bound, within collection: C) -> Bool
     where C: Collection, C.Index == Bound
   {
-    insert(contentsOf: index ..< collection.index(after: index))
+    return _insert(contentsOf: index ..< collection.index(after: index))
   }
   
   /// Removes the range that contains only the specified index from the range

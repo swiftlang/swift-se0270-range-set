@@ -116,7 +116,54 @@ final class RangeSetTests: XCTestCase {
       XCTAssertEqual(s.ranges, [1..<5, 8..<10, 14..<15, 20..<22, 27..<29])
     }
   }
-  
+
+  func testInsertWithinReturningPreviousContainment() {
+    do {
+      var s = RangeSet<Int>()
+      XCTAssertTrue(s.insert(20, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(-100, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertFalse(s.insert(20, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertFalse(s.insert(21, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(22, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(23, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(26, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertFalse(s.insert(27, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertFalse(s.insert(28, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(29, within: parent))
+    }
+    do {
+      var s = source
+      XCTAssertTrue(s.insert(100, within: parent))
+    }
+  }
+
   func testRemovals() {
     do {
       var s = source

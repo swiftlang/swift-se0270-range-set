@@ -45,7 +45,7 @@ You can now use `import SE0270_RangeSet` to make the library available in any Sw
 
 We are no longer taking contributions to this repo. Please see the 
 [guide for Contributing to Swift][contributing] for other opportunities within the Swift
-proejct. Thanks to all past contributors! 
+project. Thanks to all past contributors! 
 
 
 [proposal]: https://github.com/apple/swift-evolution/blob/master/proposals/0270-rangeset-and-collection-operations.md
